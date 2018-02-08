@@ -111,6 +111,8 @@ public:
     ~plot()
     {
         delete myAxis;
+        for (auto& t: myTrace)
+            delete t;
     }
 
     /** Add static trace
