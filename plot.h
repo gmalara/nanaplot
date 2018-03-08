@@ -12,15 +12,18 @@ class plot;
 class trace
 {
 public:
-
     trace()
         : myfRealTime( false )
     {
-
     }
+
+    ~trace() 
+    {
+        delete myLabel;    
+    }
+
     /** Convert trace to real time operation
         @param[in] w number of data points to display
-
         Data points older than w scroll off the left edge of the plot and are lost
     */
     void realTime( int w )
@@ -33,7 +36,6 @@ public:
 
     /** set static data
         @param[in] y vector of data points to display
-
         An exception is thrown when this is called
         for a trace that has been converted to real time
     */
@@ -41,7 +43,6 @@ public:
 
     /** add new value to real time data
         @param[in] y the new data point
-
         An exception is thrown when this is called
         for a trace that has not been converted to real time
     */
@@ -51,7 +52,14 @@ public:
     void color( const colors & clr )
     {
         myColor = clr;
+        if (myLabel)
+          myLabel->fgcolor(clr);
     }
+
+    /** sets the label for trace
+        @param[in] myLabelText label text
+    */
+    void setLabel(const char* myLabelText);
 
     /// set plot where this trace will appear
     void Plot( plot * p )
@@ -73,6 +81,7 @@ private:
     plot * myPlot;
     std::vector< double > myY;
     colors myColor;
+    label * myLabel = nullptr;
     bool myfRealTime;
     int myRealTimeNext;
 };
@@ -110,12 +119,13 @@ public:
 
     ~plot()
     {
-        delete myAxis;
+       delete myAxis;
+       for (auto& t: myTrace)
+         delete t;
     }
 
     /** Add static trace
         @return reference to new trace
-
         The data in a static trace does not change
     */
     trace& AddStaticTrace()
@@ -129,7 +139,6 @@ public:
     /** Add real time trace
         @param[in] w number of recent data points to display
         @return reference to new trace
-
         The data in a real time trace receives new values from time to time
         The display shows w recent values.  Older values scroll off the
         left hand side of the plot and disappear.
